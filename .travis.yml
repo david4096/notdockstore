@@ -1,115 +1,90 @@
 sudo: required
 services:
 - docker
-
 addons:
-  postgresql: "9.6"
-
+  postgresql: '9.6'
+  sonarcloud:
+    organization: "david4096"
+    token:
+      secure: "jL5kaA/QJS26BLZ3td1dgeTD/z0/cC4bh89Ph0FoBxwuYqvyheinHvSFcgd8UzmR5akauG5n3GXFyosHR0PvEf6BagpnmyjpENgShzfDRvgdfQW57lPsktOExWRcrfeTWpaopkGGxuDKMSKlohZW5/c6MemfD8rS9z4M4NmIKCPum8y04tCDeZm+r+eWbCRtsDh9aQMkW/wBcDbspJKP2AuMwpBCAwPx0VqH92o+KUathhY+zWpIgTgTjQRkQXsn9cqFEu5Hv4KapVxD/KxPepyIYOHKdaaDlMtRFAETu2q0i8CQY+hPGIbfOmCQ6TJWSQy8Kq2BNA7H6eqBfKmGPa/f8MCoRbBitQ/4v7UOubozLVYS3EOjuJRfuP2NxrBpAVhvea5LMdaHv5Cj5mxgGMN8C0F0SoP+vhWUCcJzZb3RvZ6VDR2+u9pbsuNA6ZPcYEFdwmIoCK43EEBQV7xgON3A62RcUM/lBA1OycNWX1US7Q1a+wT2Ita5VF2TqFh0kQ0uZAQa2OROQOhEwF6pFyeBSZ+rOAYUbrl5pQJe15unESFi85RZ+JFmjH6PDOBLenOlWGeaJ/1Q8CBRPuZ0oxKPAiBNbTev3yT0N06oPNj7kdfgq1Yz886GacYGI2trbuP6hIw2u5YHqjSH5QLyJs9t2RxQYlMGJM3JzZypSNM=" # encrypted value of your token
 cache:
   directories:
-  - /tmp/localstack_install_dir
-  - $HOME/.cache/pip
-  - $HOME/.m2/repository
-  - $HOME/apache-maven-3.6.2
-
+  - "/tmp/localstack_install_dir"
+  - "$HOME/.cache/pip"
+  - "$HOME/.m2/repository"
+  - "$HOME/apache-maven-3.6.2"
 dist: bionic
 language: java
 jdk: openjdk12
-
 env:
+  matrix:
   - TESTING_PROFILE=integration-tests
-
+  global:
+    secure: qtXNNTBxQWigqAo+COR/fvH4D6f4ddFhmyafqCCDyWKLp/rzIluM9jw7MkHJlThZhyfBtyfGaV4kTs7ywoexOCPZA8itQ/Ly6+x0ki3mOEM1B79FGVkdx5HW9Cy5lKLaBMOmyxmUWogbU3pTvWFDaVYdR7yQ66VVHOknRG19T14pwbQvIRdNKMP/mSPgyVgHwCtkHsPQ05AA9+LIRPhUPj41NsjmEy79A8U//2wQUUwahANtIxmH4Zrm+UT8Ub781SFfMTY1O7fzL4ck7yqb1cUrg845RubzdQNgQ1aTvs1f22prirJOaQ/VEYZH418TsfN6pke6JUS1Jl5kEWFXoV85asKyf2qQGyQBOeTgjJXkDhzgmeJNudm2GC8LPpB7rttsIgNM0+vmqvgrJy1zZw3mhhvBDjsrAMcrGX8bErrtH3Zeos2zJlwTZ2Ueg2PT7EvsVu/7LB65cay4XVhh4UkO4EPeDCxhECEOOB6RVI1xzE5snb5ocllzpSSfQU+5JVdYxCL8hdPl3aGQsFNjKI7KnM+fqyWJEYtKp18JtgM1SonwyIeTX+wVIUtRV2JnlMmaURjoAO7zpf6Wd5+H0oWiwtVXdyc7VCyEsv6NOtLET1xi8G01q5KQVazrlv8q6vDBL01MYzD+ZCA5SmeDBKgodUocjfaQPgayvliswf8=
 jobs:
   include:
-    - stage: unit-tests
-      env:
-        - TESTING_PROFILE=unit-tests
-      script: mvn --batch-mode clean install -P$TESTING_PROFILE
-# moved to CircleCI (may move back if build speed improves)
-#    - stage: unit-tests
-#      jdk: openjdk11
-#      env:
-#      - TESTING_PROFILE=unit-tests
-#      script: mvn --batch-mode clean install -P$TESTING_PROFILE
-
-# moved to CircleCI (may move back if build speed improves)
-#    - stage: automated-review
-#      jdk: openjdk11
-#      env:
-#      - TESTING_PROFILE=automated-review
-#      script:
-#      - mvn --batch-mode clean install -DskipTests -P$TESTING_PROFILE
-#      - scripts/check_migrations.sh
-
-    - stage: coverage
-      env:
-        - TESTING_PROFILE=unit-tests
-      script: mvn --batch-mode clean install jacoco:report jacoco:report-aggregate coveralls:report -P$TESTING_PROFILE,coverage
-    - stage: coverage
-      script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate coveralls:report -P$TESTING_PROFILE,coverage -DskipITs=false
-    - stage: coverage
-      script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate coveralls:report -P$TESTING_PROFILE,coverage
-      env:
-        - TESTING_PROFILE=tool-integration-tests
-    - stage: coverage
-      script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate coveralls:report -P$TESTING_PROFILE,coverage
-      env:
-        - TESTING_PROFILE=workflow-integration-tests
-        
-# not feeling the bang-for-the-buck for these, running only in release branch         
-#    - stage: coverage
-#      script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate coveralls:report -P$TESTING_PROFILE,coverage -DskipClientITs=true
-#      if: branch = master OR branch =~ /^release.*$/
-#      env:
-#        - TESTING_PROFILE=toil-integration-tests
-
-    - stage: coverage
-      script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate coveralls:report -P$TESTING_PROFILE,coverage
-      env:
-        - TESTING_PROFILE=regression-integration-tests
-      if: branch = master OR branch =~ /^release.*$/
-        
-# build lifecycle is before_install, install, before_script, script, before_cache, after_success/after_failure, after_script
-
+  - stage: unit-tests
+    env:
+    - TESTING_PROFILE=unit-tests
+    script: mvn --batch-mode clean install -P$TESTING_PROFILE
+  - stage: coverage
+    env:
+    - TESTING_PROFILE=unit-tests
+    script: mvn --batch-mode clean install jacoco:report jacoco:report-aggregate coveralls:report
+      -P$TESTING_PROFILE,coverage
+  - stage: coverage
+    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
+      coveralls:report -P$TESTING_PROFILE,coverage -DskipITs=false
+  - stage: coverage
+    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
+      coveralls:report -P$TESTING_PROFILE,coverage
+    env:
+    - TESTING_PROFILE=tool-integration-tests
+  - stage: coverage
+    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
+      coveralls:report -P$TESTING_PROFILE,coverage
+    env:
+    - TESTING_PROFILE=workflow-integration-tests
+  - stage: coverage
+    # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+    script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=david4096_notdockstore
+  - stage: coverage
+    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
+      coveralls:report -P$TESTING_PROFILE,coverage
+    env:
+    - TESTING_PROFILE=regression-integration-tests
+    if: branch = master OR branch =~ /^release.*$/
+  - stage: coverage
+    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
+      coveralls:report -P$TESTING_PROFILE,coverage
 before_install:
 - export M2_HOME=$HOME/apache-maven-3.6.2
-- if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz | tar zxf - -C $HOME; fi
+- if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz
+  | tar zxf - -C $HOME; fi
 - export PATH=$M2_HOME/bin:$PATH
-# see https://www.deps.co/guides/travis-ci-latest-java/
-- if [ -e $JAVA_HOME/lib/security/cacerts ]; then sudo rm $JAVA_HOME/lib/security/cacerts && sudo ln -s /etc/ssl/certs/java/cacerts $JAVA_HOME/lib/security/cacerts; fi
-# need to clear out old version of the plugin till everything is merged due to https://github.com/maven-download-plugin/maven-download-plugin/issues/80
+- if [ -e $JAVA_HOME/lib/security/cacerts ]; then sudo rm $JAVA_HOME/lib/security/cacerts
+  && sudo ln -s /etc/ssl/certs/java/cacerts $JAVA_HOME/lib/security/cacerts; fi
 - rm -Rf $HOME/.m2/repository/.cache/download-maven-plugin/
-# turn this back on when npm settles down/we find a swagger2openapi replacement
-#- npm install -g swagger2openapi@2.11.16
-# decrypt migration before initial build
 - scripts/decrypt.sh
-# turn this back on with updates to swagger (particularly swagger-maven-plugin), current implementation is too non-deterministic
-#- scripts/check-swagger.sh
-# codacy hookup
 - sudo apt-get install jq
 - wget --no-verbose -O ~/codacy-coverage-reporter-assembly-latest.jar https://github.com/codacy/codacy-coverage-reporter/releases/download/4.0.5/codacy-coverage-reporter-4.0.5-assembly.jar
 - pyenv global 3.6.7
-
 install:
 - docker version
 - scripts/install-tests.sh
-
 before_script:
 - psql -c "create user dockstore with password 'dockstore' createdb;" -U postgres
 - psql -c 'create database webservice_test with owner = dockstore;' -U postgres
 - export PATH=$PATH:$PWD/dockstore-client/target
-# debug by double checking versions of stuff
 - mvn -version
 - echo $JAVA_HOME
-
 before_cache:
 - rm -rf /home/travis/.m2/repository/io/dockstore
 - rm -rf $HOME/.m2/repository/.cache/download-maven-plugin directory
-
 after_success:
-- bash <(curl -s https://codecov.io/bash) -F ${TESTING_PROFILE//-} || echo "Codecov did not collect coverage reports"
-- java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r reports/target/site/jacoco-aggregate/jacoco.xml 
-  
+- bash <(curl -s https://codecov.io/bash) -F ${TESTING_PROFILE//-} || echo "Codecov
+  did not collect coverage reports"
+- java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r reports/target/site/jacoco-aggregate/jacoco.xml
 notifications:
   slack:
     on_success: never
