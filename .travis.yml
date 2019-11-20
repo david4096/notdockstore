@@ -23,40 +23,9 @@ env:
     secure: qtXNNTBxQWigqAo+COR/fvH4D6f4ddFhmyafqCCDyWKLp/rzIluM9jw7MkHJlThZhyfBtyfGaV4kTs7ywoexOCPZA8itQ/Ly6+x0ki3mOEM1B79FGVkdx5HW9Cy5lKLaBMOmyxmUWogbU3pTvWFDaVYdR7yQ66VVHOknRG19T14pwbQvIRdNKMP/mSPgyVgHwCtkHsPQ05AA9+LIRPhUPj41NsjmEy79A8U//2wQUUwahANtIxmH4Zrm+UT8Ub781SFfMTY1O7fzL4ck7yqb1cUrg845RubzdQNgQ1aTvs1f22prirJOaQ/VEYZH418TsfN6pke6JUS1Jl5kEWFXoV85asKyf2qQGyQBOeTgjJXkDhzgmeJNudm2GC8LPpB7rttsIgNM0+vmqvgrJy1zZw3mhhvBDjsrAMcrGX8bErrtH3Zeos2zJlwTZ2Ueg2PT7EvsVu/7LB65cay4XVhh4UkO4EPeDCxhECEOOB6RVI1xzE5snb5ocllzpSSfQU+5JVdYxCL8hdPl3aGQsFNjKI7KnM+fqyWJEYtKp18JtgM1SonwyIeTX+wVIUtRV2JnlMmaURjoAO7zpf6Wd5+H0oWiwtVXdyc7VCyEsv6NOtLET1xi8G01q5KQVazrlv8q6vDBL01MYzD+ZCA5SmeDBKgodUocjfaQPgayvliswf8=
 jobs:
   include:
-  - stage: unit-tests
-    env:
-    - TESTING_PROFILE=unit-tests
-    script: mvn --batch-mode clean install -P$TESTING_PROFILE
-  - stage: coverage
-    env:
-    - TESTING_PROFILE=unit-tests
-    script: mvn --batch-mode clean install jacoco:report jacoco:report-aggregate coveralls:report
-      -P$TESTING_PROFILE,coverage
-  - stage: coverage
-    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
-      coveralls:report -P$TESTING_PROFILE,coverage -DskipITs=false
-  - stage: coverage
-    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
-      coveralls:report -P$TESTING_PROFILE,coverage
-    env:
-    - TESTING_PROFILE=tool-integration-tests
-  - stage: coverage
-    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
-      coveralls:report -P$TESTING_PROFILE,coverage
-    env:
-    - TESTING_PROFILE=workflow-integration-tests
   - stage: coverage
     # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
-    script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=david4096_notdockstore
-  - stage: coverage
-    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
-      coveralls:report -P$TESTING_PROFILE,coverage
-    env:
-    - TESTING_PROFILE=regression-integration-tests
-    if: branch = master OR branch =~ /^release.*$/
-  - stage: coverage
-    script: mvn --batch-mode clean install jacoco:report-integration jacoco:report-aggregate
-      coveralls:report -P$TESTING_PROFILE,coverage
+    script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=david4096_notdockstore -q
 before_install:
 - export M2_HOME=$HOME/apache-maven-3.6.2
 - if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz
@@ -65,7 +34,6 @@ before_install:
 - if [ -e $JAVA_HOME/lib/security/cacerts ]; then sudo rm $JAVA_HOME/lib/security/cacerts
   && sudo ln -s /etc/ssl/certs/java/cacerts $JAVA_HOME/lib/security/cacerts; fi
 - rm -Rf $HOME/.m2/repository/.cache/download-maven-plugin/
-- scripts/decrypt.sh
 - sudo apt-get install jq
 - wget --no-verbose -O ~/codacy-coverage-reporter-assembly-latest.jar https://github.com/codacy/codacy-coverage-reporter/releases/download/4.0.5/codacy-coverage-reporter-4.0.5-assembly.jar
 - pyenv global 3.6.7
