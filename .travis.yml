@@ -34,7 +34,6 @@ before_install:
 - if [ -e $JAVA_HOME/lib/security/cacerts ]; then sudo rm $JAVA_HOME/lib/security/cacerts
   && sudo ln -s /etc/ssl/certs/java/cacerts $JAVA_HOME/lib/security/cacerts; fi
 - rm -Rf $HOME/.m2/repository/.cache/download-maven-plugin/
-- scripts/decrypt.sh
 - sudo apt-get install jq
 - wget --no-verbose -O ~/codacy-coverage-reporter-assembly-latest.jar https://github.com/codacy/codacy-coverage-reporter/releases/download/4.0.5/codacy-coverage-reporter-4.0.5-assembly.jar
 - pyenv global 3.6.7
