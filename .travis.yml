@@ -25,7 +25,7 @@ jobs:
   include:
   - stage: coverage
     # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
-    script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=david4096_notdockstore
+    script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=david4096_notdockstore -q
 before_install:
 - export M2_HOME=$HOME/apache-maven-3.6.2
 - if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz
